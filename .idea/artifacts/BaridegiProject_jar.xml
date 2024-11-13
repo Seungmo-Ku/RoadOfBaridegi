@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="BaridegiProject:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BaridegiProject_jar</output-path>
+    <root id="archive" name="BaridegiProject.jar">
+      <element id="module-output" name="BaridegiProject" />
+    </root>
+  </artifact>
+</component>
