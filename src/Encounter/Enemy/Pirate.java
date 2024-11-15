@@ -10,7 +10,7 @@ public class Pirate extends Enemies {
     public static String[] options = new String[] {"공격한다", "방어한다", "도주를 시도한다"};
 
     public Pirate() {
-        super("강도", 20,
+        super("산적", 20,
                 5, 5, 5, 1000, true);
         Random rand = new Random();
         this.hp = rand.nextInt(20) + 10;

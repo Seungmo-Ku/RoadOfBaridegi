@@ -49,6 +49,15 @@ public class Main {
                         1, new String[]{"확인"});
                 day ++;
 
+                if(args != null && args.length > 0){
+                    day = Integer.parseInt(args[0]);
+                    if(args[1] != null)
+                        baridegi.addPower(Integer.parseInt(args[1]));
+                    if(args[2] != null)
+                        baridegi.addDex(Integer.parseInt(args[1]));
+                    if(args[3] != null)
+                        baridegi.addWisdom(Integer.parseInt(args[1]));
+                }
                 while(day < 30) {
                     if(day == 17) { //무장신선
                         displayMain("저승세계를 지나 신선세계에 이른 바리공주는 " +
@@ -141,7 +150,10 @@ public class Main {
                                 "다시 떠난다.", 1, new String[]{"확인"});
                     }else if(day == 10) { //첫번쨰공주
                         firstPrincessInteraction();
-                    }else if(day == 25) { //두번째공주
+                    }else if(day == 24) {
+                        merchantInteraction();
+                    }
+                    else if(day == 25) { //두번째공주
                         secondPrincessInteraction();
                     }
                     else {
@@ -180,13 +192,12 @@ public class Main {
                 1, new String[]{"확인"});
                 displayStart("(에필로그)하지만 이미 양전마마는 승하해 장사를 지내려는 중이었다.",
                 1, new String[]{"확인"});
-                if(baridegi.getMental() < 40) { //sad ending
-                    displayStart("(에필로그)정신이 피폐해질 대로 피폐해진 바리데기는 " +
-                                    "아무런 생각이 들지 않았다.",
-                            1, new String[]{"확인"});
-                    displayStart("Sad Ending",
-                            1, new String[]{"확인"});
-                }else { //happy ending
+                displayStart("바리데기는 절망 속에서 두 가지 자아로 분열한다.",
+                1, new String[]{"확인"});
+                displayStart("끝까지 버티려는 바리데기의 자아는 포기하고 싶은 자아를 마주하게 된다.",
+                1, new String[]{"확인"});
+                myselfInteraction(baridegi);
+
                     displayStart("(에필로그)바리데기는 상여를 멈추게 하고 약수와 꽃으로 양전마마를 살린다.",
                             1, new String[]{"확인"});
 
@@ -204,7 +215,7 @@ public class Main {
                     displayStart("Happy Ending",
                             1, new String[]{"확인"});
 
-                }
+                
 
 
     }
@@ -232,7 +243,6 @@ public class Main {
         }
     }
     private static void defense(Baridegi baridegi, Enemies enemies) {
-        //민첩, 지혜 합산 한 다음 20 랜덤 각자 추가해서 더 높으면 방어 성공
         Random random = new Random();
         int bariStat = baridegi.getDex() * 2 + baridegi.getWisdom() + random.nextInt(10);
         int enemyStat = enemies.getDex() * 2 + enemies.getWisdom() + random.nextInt(10);
@@ -326,6 +336,42 @@ public class Main {
             enemyDie(baridegi, fire);
         }
         return 0;
+
+    }
+    private static void myselfInteraction(Baridegi baridegi) {   //공격한다, 방어를 시도한다, 도망을 시도한다
+        Myself myself = new Myself(baridegi.getMental(), baridegi.getPower(), baridegi.getDex(), baridegi.getWisdom());
+        boolean isEscaped = false;
+        while(myself.getHp() > 0 && baridegi.getHp() > 0) {
+            int response = 1;
+            if(myself.isStunned()) {
+                response = displayMain(Myself.displayText + "상대방은 잠시 기절할 것 같다." +
+                                "\n체력 : "+ myself.getHp()+", 근력 : "+myself.getPower()+", 민첩 : " + myself.getDex(),
+                        Myself.numOfOptions, Myself.options);
+            }else {
+                response = displayMain(Myself.displayText +
+                                "\n체력 : "+ myself.getHp()+", 근력 : "+myself.getPower()+", 민첩 : " + myself.getDex(),
+                        Myself.numOfOptions, Myself.options);
+            }
+
+            switch (response) {
+                case 1:
+                    attack(baridegi, myself);
+                    break;
+                case 2:
+                    defense(baridegi, myself);
+                    break;
+                case 3:
+                    isEscaped = escape(baridegi, myself);
+                    break;
+            }
+            if(isEscaped) {break;}
+        }
+        if(baridegi.getHp() <= 0) { //패배
+            gameOver();
+        }else {
+            if(!isEscaped) enemyDie(baridegi, myself);
+            else successfullyEscaped(baridegi, myself);
+        }
 
     }
     private static void firstPrincessInteraction() {   //공격한다, 방어를 시도한다, 도망을 시도한다
@@ -564,6 +610,9 @@ public class Main {
                 }
                 break;
         }
+        if(day == 24) {
+            merchantInteraction();
+        }
     }
     private static void chestInteraction() {
         int response = displayMain(Chest.displayText, Chest.numOfOptions, Chest.options);
@@ -652,7 +701,16 @@ public class Main {
         }
     }
     private static void gameOver() {
-        if(baridegi.getHp() <= 0) {
+        if(day == 30) {
+            displayStart("(에필로그)정신이 피폐해질 대로 피폐해진 바리데기는 " +
+                            "아무런 생각이 들지 않았다.",
+                    1, new String[]{"확인"});
+            displayStart("(에필로그)그저 멍하니 양전마마의 상여를 지켜 볼 뿐이었다.",
+                    1, new String[]{"확인"});
+            displayStart("Sad Ending",
+                    1, new String[]{"확인"});
+        }
+        else if(baridegi.getHp() <= 0) {
             displayStart("바리데기는 체력의 고갈로 쓰러지고 말았습니다.\n" +
                     "당신의 바리데기는 "+day+"일 동안 생존했습니다.", 1, new String[]{"종료"});
         } else {
